@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService, WebSocketService, UserService } from '../../core/services';
+import { AuthService, WebSocketService, UserService, ThemeService } from '../../core/services';
 import { User } from '../../core/models';
 import { ChatListComponent } from './chat-list/chat-list.component';
 import { ChatWindowComponent } from './chat-window/chat-window.component';
@@ -20,6 +20,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   constructor(
     public authService: AuthService,
+    public themeService: ThemeService,
     private webSocketService: WebSocketService,
     private userService: UserService,
     private router: Router
@@ -66,6 +67,10 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   onUserSelected(user: User): void {
     this.selectedUser.set(user);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 
   onLogout(): void {

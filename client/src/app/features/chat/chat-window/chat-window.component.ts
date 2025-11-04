@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, signal, effect } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User, Message } from '../../../core/models';
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './chat-window.component.html',
   styleUrl: './chat-window.component.css'
 })
-export class ChatWindowComponent implements OnInit, OnDestroy {
+export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedUser!: User;
   @Input() currentUser!: User;
 
@@ -26,14 +26,22 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   constructor(
     private webSocketService: WebSocketService,
     private messageService: MessageService
-  ) {
-    // Watch for selected user changes and reload messages
-    effect(() => {
-      if (this.selectedUser) {
-        console.log('Selected user changed to:', this.selectedUser.displayName);
+  ) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Detect when selectedUser changes
+    if (changes['selectedUser'] && !changes['selectedUser'].firstChange) {
+      const newUser = changes['selectedUser'].currentValue;
+      console.log('Selected user changed to:', newUser?.displayName);
+      
+      // Clear current messages
+      this.messages.set([]);
+      
+      // Load new chat history
+      if (newUser) {
         this.loadMessageHistory();
       }
-    });
+    }
   }
 
   ngOnInit(): void {

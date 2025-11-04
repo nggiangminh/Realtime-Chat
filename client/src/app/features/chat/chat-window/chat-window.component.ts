@@ -27,16 +27,21 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     private webSocketService: WebSocketService,
     private messageService: MessageService
   ) {
-    // Watch for selected user changes
+    // Watch for selected user changes and reload messages
     effect(() => {
       if (this.selectedUser) {
+        console.log('Selected user changed to:', this.selectedUser.displayName);
         this.loadMessageHistory();
       }
     });
   }
 
   ngOnInit(): void {
-    this.loadMessageHistory();
+    // Load initial message history
+    if (this.selectedUser) {
+      this.loadMessageHistory();
+    }
+    // Subscribe to real-time messages
     this.subscribeToMessages();
   }
 
@@ -73,13 +78,22 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   subscribeToMessages(): void {
     this.messageSubscription = this.webSocketService.messages$.subscribe({
       next: (message) => {
+        console.log('Received WebSocket message:', message);
+        
         // Only add message if it's from or to the selected user
         if (
           (message.senderId === this.selectedUser.id && message.receiverId === this.currentUser.id) ||
           (message.senderId === this.currentUser.id && message.receiverId === this.selectedUser.id)
         ) {
-          this.messages.update(msgs => [...msgs, message]);
-          this.scrollToBottom();
+          // Check for duplicate before adding
+          const exists = this.messages().some(m => m.id === message.id);
+          if (!exists) {
+            console.log('Adding message to UI:', message);
+            this.messages.update(msgs => [...msgs, message]);
+            this.scrollToBottom();
+          } else {
+            console.log('Message already exists, skipping:', message.id);
+          }
         }
       }
     });
@@ -90,9 +104,19 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     if (!content || this.isSending()) return;
 
     this.isSending.set(true);
-    this.webSocketService.sendMessage(this.selectedUser.id, content);
+    
+    console.log('Sending message:', content);
+    
+    // Clear input immediately for better UX
     this.messageInput.set('');
-    this.isSending.set(false);
+    
+    // Send via WebSocket
+    this.webSocketService.sendMessage(this.selectedUser.id, content);
+    
+    // Reset sending state after a short delay
+    setTimeout(() => {
+      this.isSending.set(false);
+    }, 500);
   }
 
   onMessageInputChange(event: Event): void {

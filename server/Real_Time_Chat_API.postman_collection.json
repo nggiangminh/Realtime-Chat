@@ -1,0 +1,664 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Real Time Chat API",
+		"description": "Collection cho tất cả API endpoints của Real Time Chat Application\n\n🔧 **Setup**:\n1. Import collection này vào Postman\n2. Tạo Environment với variable `baseUrl` = `http://localhost:8083`\n3. Đăng ký user mới → Đăng nhập → Copy token vào Environment variable `authToken`\n4. Test các API theo thứ tự\n\n🔐 **Authentication**:\n- Sử dụng JWT Bearer Token\n- Token có thời hạn 24 giờ\n- Thêm `Authorization: Bearer {{authToken}}` vào header",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🧪 Test Endpoints",
+			"item": [
+				{
+					"name": "Test Public Endpoint",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/test/public",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"public"
+							]
+						},
+						"description": "Test endpoint công khai, không cần authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Test Protected Endpoint",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/test/protected",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"protected"
+							]
+						},
+						"description": "Test endpoint bảo mật, cần JWT token"
+					},
+					"response": []
+				}
+			],
+			"description": "Các endpoint để test cơ bản"
+		},
+		{
+			"name": "🔑 Authentication",
+			"item": [
+				{
+					"name": "Đăng Ký User Mới",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test status code",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// Test response structure",
+									"pm.test(\"Response has correct structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('result', 'SUCCESS');",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('email');",
+									"    pm.expect(jsonData.data).to.have.property('displayName');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"alice@example.com\",\n    \"password\": \"password123\",\n    \"displayName\": \"Alice Johnson\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Đăng ký user mới trong hệ thống"
+					},
+					"response": []
+				},
+				{
+					"name": "Đăng Nhập",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test status code",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test response structure và lưu token",
+									"pm.test(\"Response has correct structure and save token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('result', 'SUCCESS');",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    pm.expect(jsonData.data).to.have.property('user');",
+									"    ",
+									"    // Lưu token vào environment variable",
+									"    pm.environment.set('authToken', jsonData.data.token);",
+									"    ",
+									"    // Lưu user info",
+									"    pm.environment.set('currentUserId', jsonData.data.user.id);",
+									"    pm.environment.set('currentUserEmail', jsonData.data.user.email);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"alice@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Đăng nhập và nhận JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy Thông Tin User Hiện Tại",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Lấy thông tin user hiện tại từ JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Đăng Xuất",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Đăng xuất và cập nhật last seen"
+					},
+					"response": []
+				}
+			],
+			"description": "Các API liên quan đến authentication"
+		},
+		{
+			"name": "👥 User Management",
+			"item": [
+				{
+					"name": "Lấy Danh Sách Tất Cả Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Lấy danh sách tất cả users trong hệ thống"
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy Thông Tin User Theo ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"1"
+							]
+						},
+						"description": "Lấy thông tin chi tiết của user theo ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Tìm Kiếm Users Theo Tên",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/search?q=alice",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "alice",
+									"description": "Từ khóa tìm kiếm theo display name"
+								}
+							]
+						},
+						"description": "Tìm kiếm users theo tên hiển thị"
+					},
+					"response": []
+				}
+			],
+			"description": "Các API quản lý user"
+		},
+		{
+			"name": "💬 Messages",
+			"item": [
+				{
+					"name": "Lấy Tất Cả Conversations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages"
+							]
+						},
+						"description": "Lấy tổng quan tất cả conversations của user hiện tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy Lịch Sử Chat Với User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test theo design - expect array trực tiếp, không có wrapper",
+									"pm.test(\"Response is array\", function () {",
+									"    pm.expect(pm.response.json()).to.be.an('array');",
+									"});",
+									"",
+									"// Test message structure theo design",
+									"pm.test(\"Message structure matches design\", function () {",
+									"    const messages = pm.response.json();",
+									"    if (messages.length > 0) {",
+									"        const message = messages[0];",
+									"        pm.expect(message).to.have.property('id');",
+									"        pm.expect(message).to.have.property('senderId');",
+									"        pm.expect(message).to.have.property('receiverId');",
+									"        pm.expect(message).to.have.property('content');",
+									"        pm.expect(message).to.have.property('sentAt');",
+									"        pm.expect(message).to.have.property('isRead');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"2"
+							]
+						},
+						"description": "Lấy lịch sử chat với user có ID = 2 (tuân thủ design)"
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy Tin Nhắn Chưa Đọc",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/unread",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"unread"
+							]
+						},
+						"description": "Lấy danh sách tin nhắn chưa đọc của user hiện tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Đánh Dấu Tin Nhắn Đã Đọc",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test theo design - expect 200 OK với empty body",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/1/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"1",
+								"read"
+							]
+						},
+						"description": "Đánh dấu tin nhắn có ID = 1 là đã đọc (chỉ receiver mới được phép)"
+					},
+					"response": []
+				},
+				{
+					"name": "Đánh Dấu Tất Cả Tin Nhắn Từ User Đã Đọc",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/read-all/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"read-all",
+								"2"
+							]
+						},
+						"description": "Đánh dấu tất cả tin nhắn từ user có ID = 2 là đã đọc"
+					},
+					"response": []
+				}
+			],
+			"description": "Các API quản lý tin nhắn"
+		},
+		{
+			"name": "🔌 WebSocket Support APIs",
+			"item": [
+				{
+					"name": "Kiểm tra Server WebSocket Ready",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ws/info",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ws",
+								"info"
+							]
+						},
+						"description": "Kiểm tra WebSocket server có sẵn sàng không (SockJS info endpoint)"
+					},
+					"response": []
+				},
+				{
+					"name": "Test Server Health Before WebSocket",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Test server và token trước khi connect WebSocket"
+					},
+					"response": []
+				}
+			],
+			"description": "Các API hỗ trợ test WebSocket"
+		},
+		{
+			"name": "📝 Sample Requests",
+			"item": [
+				{
+					"name": "Đăng Ký User Thứ 2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"bob@example.com\",\n    \"password\": \"password123\",\n    \"displayName\": \"Bob Smith\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Đăng ký user thứ 2 để test chat"
+					},
+					"response": []
+				},
+				{
+					"name": "Đăng Ký User Thứ 3",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"charlie@example.com\",\n    \"password\": \"password123\",\n    \"displayName\": \"Charlie Brown\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Đăng ký user thứ 3 để test với nhiều user"
+					},
+					"response": []
+				}
+			],
+			"description": "Các request mẫu để tạo sample data"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8083",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "currentUserId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "currentUserEmail",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

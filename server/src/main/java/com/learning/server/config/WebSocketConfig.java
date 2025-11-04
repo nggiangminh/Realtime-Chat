@@ -76,9 +76,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                 Long userId = jwtTokenProvider.getUserIdFromToken(token);
                                 String email = jwtTokenProvider.getEmailFromToken(token);
 
-                                // Create authentication object with userId as principal
+                                // Create authentication object with email as principal (not userId)
+                                // This allows principal.getName() to return email in controllers
                                 UsernamePasswordAuthenticationToken auth =
-                                    new UsernamePasswordAuthenticationToken(userId, null, null);
+                                    new UsernamePasswordAuthenticationToken(email, null, null);
 
                                 // Set authentication in accessor
                                 accessor.setUser(auth);

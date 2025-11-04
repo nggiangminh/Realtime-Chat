@@ -26,6 +26,11 @@ public interface UserService {
     List<UserResponseDTO> searchUsersByDisplayName(String query);
 
     /**
+     * Tìm kiếm users theo email hoặc displayName
+     */
+    List<UserResponseDTO> searchUsersByEmailOrDisplayName(String query);
+
+    /**
      * Lấy thông tin user theo email
      */
     UserResponseDTO getUserByEmail(String email);

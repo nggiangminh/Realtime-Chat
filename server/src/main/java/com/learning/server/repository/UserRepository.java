@@ -48,4 +48,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("SELECT u FROM User u WHERE LOWER(u.displayName) LIKE LOWER(CONCAT('%', :displayName, '%'))")
     List<User> findByDisplayNameContainingIgnoreCase(@Param("displayName") String displayName);
+
+    /**
+     * Tìm kiếm users theo email hoặc displayName (case insensitive)
+     * @param query từ khóa tìm kiếm
+     * @return List<User>
+     */
+    @Query("SELECT u FROM User u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.displayName) LIKE LOWER(CONCAT('%', :query, '%'))")
+    List<User> findByEmailOrDisplayNameContainingIgnoreCase(@Param("query") String query);
 }

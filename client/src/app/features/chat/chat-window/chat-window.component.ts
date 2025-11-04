@@ -50,14 +50,21 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.messageService.getMessageHistory(this.selectedUser.id).subscribe({
       next: (response) => {
-        if (response.success && response.data) {
+        console.log('Message history response:', response);
+        // Backend trả về result: "SUCCESS" hoặc success: true
+        if ((response.result === 'SUCCESS' || response.success) && response.data) {
+          console.log('Loaded messages:', response.data);
           this.messages.set(response.data);
+        } else {
+          console.log('No messages or failed:', response);
+          this.messages.set([]);
         }
         this.isLoading.set(false);
         this.scrollToBottom();
       },
       error: (error) => {
         console.error('Error loading messages:', error);
+        this.messages.set([]);
         this.isLoading.set(false);
       }
     });

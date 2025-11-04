@@ -64,7 +64,7 @@ public class UserController {
     }
 
     /**
-     * Tìm kiếm users theo tên hiển thị
+     * Tìm kiếm users theo email hoặc tên hiển thị
      * GET /api/users/search?q={query}
      */
     @GetMapping("/search")
@@ -72,7 +72,8 @@ public class UserController {
         try {
             log.info("Tìm kiếm users với query: {}", q);
 
-            List<UserResponseDTO> users = userService.searchUsersByDisplayName(q);
+            // Sử dụng method mới tìm kiếm cả email và displayName
+            List<UserResponseDTO> users = userService.searchUsersByEmailOrDisplayName(q);
 
             return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Tìm kiếm users thành công", users));
 

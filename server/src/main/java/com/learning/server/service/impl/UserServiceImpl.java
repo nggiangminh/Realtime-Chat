@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDTO> searchUsers(String query) {
+    public List<UserResponseDTO> searchUsersByEmailOrDisplayName(String query) {
         if (query == null || query.trim().isEmpty()) {
             throw new IllegalArgumentException("Query tìm kiếm không được để trống");
         }

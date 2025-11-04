@@ -46,10 +46,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.userService.getAllUsers().subscribe({
       next: (response) => {
-        if (response.success && response.data) {
+        console.log('Load users response:', response);
+        // Backend trả về result: "SUCCESS" thay vì success: true
+        if ((response.result === 'SUCCESS' || response.success) && response.data) {
           // Filter out current user from the list
           const currentUserId = this.currentUser()?.id;
           const filteredUsers = response.data.filter(u => u.id !== currentUserId);
+          console.log('Filtered users:', filteredUsers);
           this.users.set(filteredUsers);
         }
         this.isLoading.set(false);

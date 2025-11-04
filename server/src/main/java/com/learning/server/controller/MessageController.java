@@ -53,10 +53,10 @@ public class MessageController {
     /**
      * Lấy lịch sử chat với user cụ thể
      * GET /api/messages/{userId}
-     * Tuân thủ design: trả về List<MessageResponseDTO> trực tiếp
+     * Trả về ApiResponse để đồng nhất với các endpoint khác
      */
     @GetMapping("/{userId}")
-    public ResponseEntity<List<MessageResponseDTO>> getChatHistory(
+    public ResponseEntity<ApiResponse<List<MessageResponseDTO>>> getChatHistory(
             @PathVariable Long userId,
             Authentication authentication) {
 
@@ -69,20 +69,23 @@ public class MessageController {
             // Validate không thể lấy lịch sử chat với chính mình
             if (currentUserId.equals(userId)) {
                 log.warn("User {} trying to get chat history with themselves", currentUserId);
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>("ERROR", "Không thể lấy lịch sử chat với chính mình", null));
             }
 
             List<MessageResponseDTO> messages = messageService.getChatHistory(currentUserId, userId);
 
             log.info("Lấy lịch sử chat thành công: {} tin nhắn", messages.size());
-            return ResponseEntity.ok(messages);
+            return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Lấy lịch sử chat thành công", messages));
 
         } catch (IllegalArgumentException e) {
             log.warn("Lỗi validation khi lấy lịch sử chat: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>("ERROR", "Lỗi validation: " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Lỗi khi lấy lịch sử chat: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>("ERROR", "Lỗi server: " + e.getMessage(), null));
         }
     }
 

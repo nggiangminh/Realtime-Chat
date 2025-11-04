@@ -39,14 +39,18 @@ export class LoginComponent {
 
     this.authService.login({ email, password }).subscribe({
       next: (response) => {
+        console.log('Login response:', response);
         this.isLoading.set(false);
-        if (response.success) {
+        // Backend trả về result: "SUCCESS" thay vì success: true
+        if (response.result === 'SUCCESS' || response.success) {
+          console.log('Login successful, navigating to /chat');
           this.router.navigate(['/chat']);
         } else {
           this.errorMessage.set(response.message || 'Đăng nhập thất bại');
         }
       },
       error: (error) => {
+        console.error('Login error:', error);
         this.isLoading.set(false);
         this.errorMessage.set(error.error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
       }

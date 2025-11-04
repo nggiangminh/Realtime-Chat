@@ -53,6 +53,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserResponseDTO> searchUsers(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new IllegalArgumentException("Query tìm kiếm không được để trống");
+        }
+
+        List<User> users = userRepository.findByEmailOrDisplayNameContainingIgnoreCase(query.trim());
+
+        return users.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public UserResponseDTO getUserByEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email không được để trống");

@@ -29,7 +29,8 @@ export interface LoginResponse {
  * API Response Wrapper - Cấu trúc chung cho mọi API response
  */
 export interface ApiResponse<T> {
-  success: boolean;
+  success?: boolean;
+  result?: 'SUCCESS' | 'ERROR'; // Backend trả về result thay vì success
   message: string;
   data?: T;
   timestamp?: string;

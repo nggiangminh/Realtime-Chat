@@ -38,8 +38,13 @@ export class AuthService {
     return this.http.post<ApiResponse<LoginResponse>>(`${this.API_URL}/login`, loginData)
       .pipe(
         tap(response => {
-          if (response.success && response.data) {
+          console.log('AuthService: Processing login response', response);
+          // Backend trả về result: "SUCCESS" hoặc success: true
+          if ((response.result === 'SUCCESS' || response.success) && response.data) {
+            console.log('AuthService: Saving session', response.data);
             this.setSession(response.data);
+          } else {
+            console.log('AuthService: Login failed, no session saved');
           }
         })
       );

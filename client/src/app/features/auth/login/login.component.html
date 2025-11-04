@@ -1,0 +1,80 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Đăng Nhập</h1>
+      <p>Chào mừng trở lại!</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="your@email.com"
+          [class.error]="email?.invalid && email?.touched"
+        />
+        @if (email?.invalid && email?.touched) {
+          <div class="error-message">
+            @if (email?.errors?.['required']) {
+              <span>Email là bắt buộc</span>
+            }
+            @if (email?.errors?.['email']) {
+              <span>Email không hợp lệ</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.error]="password?.invalid && password?.touched"
+        />
+        @if (password?.invalid && password?.touched) {
+          <div class="error-message">
+            @if (password?.errors?.['required']) {
+              <span>Mật khẩu là bắt buộc</span>
+            }
+            @if (password?.errors?.['minlength']) {
+              <span>Mật khẩu phải có ít nhất 8 ký tự</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="alert-error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        class="btn-primary"
+        [disabled]="loginForm.invalid || isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="loading-spinner"></span>
+          <span>Đang đăng nhập...</span>
+        } @else {
+          <span>Đăng nhập</span>
+        }
+      </button>
+
+      <!-- Register Link -->
+      <div class="form-footer">
+        <p>Chưa có tài khoản? <a routerLink="/register" class="link">Đăng ký ngay</a></p>
+      </div>
+    </form>
+  </div>
+</div>

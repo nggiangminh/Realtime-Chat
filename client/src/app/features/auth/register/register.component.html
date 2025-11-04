@@ -1,0 +1,131 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h1>Đăng Ký</h1>
+      <p>Tạo tài khoản mới để bắt đầu trò chuyện</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <!-- Display Name Field -->
+      <div class="form-group">
+        <label for="displayName">Tên hiển thị</label>
+        <input
+          type="text"
+          id="displayName"
+          formControlName="displayName"
+          placeholder="Nhập tên của bạn"
+          [class.error]="displayName?.invalid && displayName?.touched"
+        />
+        @if (displayName?.invalid && displayName?.touched) {
+          <div class="error-message">
+            @if (displayName?.errors?.['required']) {
+              <span>Tên hiển thị là bắt buộc</span>
+            }
+            @if (displayName?.errors?.['minlength']) {
+              <span>Tên hiển thị phải có ít nhất 2 ký tự</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="your@email.com"
+          [class.error]="email?.invalid && email?.touched"
+        />
+        @if (email?.invalid && email?.touched) {
+          <div class="error-message">
+            @if (email?.errors?.['required']) {
+              <span>Email là bắt buộc</span>
+            }
+            @if (email?.errors?.['email']) {
+              <span>Email không hợp lệ</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.error]="password?.invalid && password?.touched"
+        />
+        @if (password?.invalid && password?.touched) {
+          <div class="error-message">
+            @if (password?.errors?.['required']) {
+              <span>Mật khẩu là bắt buộc</span>
+            }
+            @if (password?.errors?.['minlength']) {
+              <span>Mật khẩu phải có ít nhất 8 ký tự</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Confirm Password Field -->
+      <div class="form-group">
+        <label for="confirmPassword">Xác nhận mật khẩu</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          placeholder="••••••••"
+          [class.error]="confirmPassword?.invalid && confirmPassword?.touched"
+        />
+        @if (confirmPassword?.invalid && confirmPassword?.touched) {
+          <div class="error-message">
+            @if (confirmPassword?.errors?.['required']) {
+              <span>Xác nhận mật khẩu là bắt buộc</span>
+            }
+            @if (confirmPassword?.errors?.['passwordMismatch']) {
+              <span>Mật khẩu không khớp</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Success Message -->
+      @if (successMessage()) {
+        <div class="alert-success">
+          {{ successMessage() }}
+        </div>
+      }
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="alert-error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        class="btn-primary"
+        [disabled]="registerForm.invalid || isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="loading-spinner"></span>
+          <span>Đang đăng ký...</span>
+        } @else {
+          <span>Đăng ký</span>
+        }
+      </button>
+
+      <!-- Login Link -->
+      <div class="form-footer">
+        <p>Đã có tài khoản? <a routerLink="/login" class="link">Đăng nhập ngay</a></p>
+      </div>
+    </form>
+  </div>
+</div>

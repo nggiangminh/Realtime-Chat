@@ -1,0 +1,71 @@
+<div class="chat-window">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="header-user">
+      <div class="user-avatar">
+        {{ getUserInitial(selectedUser.displayName) }}
+      </div>
+      <div class="user-info">
+        <h3>{{ selectedUser.displayName }}</h3>
+        <p class="user-status">Đang hoạt động</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="messages-container">
+    @if (isLoading()) {
+      <div class="loading-messages">
+        <div class="spinner"></div>
+        <p>Đang tải tin nhắn...</p>
+      </div>
+    } @else if (messages().length === 0) {
+      <div class="no-messages">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <p>Chưa có tin nhắn nào</p>
+        <span>Gửi tin nhắn đầu tiên để bắt đầu cuộc trò chuyện</span>
+      </div>
+    } @else {
+      <div class="messages-list">
+        @for (message of messages(); track message.id) {
+          <div class="message-wrapper" [class.sent]="isSentByMe(message)">
+            <div class="message-bubble">
+              <p class="message-content">{{ message.content }}</p>
+              <span class="message-time">{{ formatTime(message.sentAt) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Message Input -->
+  <div class="message-input-container">
+    <div class="input-wrapper">
+      <input
+        type="text"
+        placeholder="Nhập tin nhắn..."
+        [value]="messageInput()"
+        (input)="onMessageInputChange($event)"
+        (keypress)="onKeyPress($event)"
+        [disabled]="isSending()"
+      />
+      <button
+        class="btn-send"
+        (click)="sendMessage()"
+        [disabled]="!messageInput().trim() || isSending()"
+      >
+        @if (isSending()) {
+          <div class="btn-spinner"></div>
+        } @else {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        }
+      </button>
+    </div>
+  </div>
+</div>

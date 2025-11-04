@@ -1,0 +1,50 @@
+<div class="chat-container">
+  <!-- Sidebar - User List -->
+  <div class="chat-sidebar">
+    <div class="sidebar-header">
+      <div class="current-user">
+        <div class="user-avatar">
+          {{ currentUser()?.displayName?.charAt(0)?.toUpperCase() }}
+        </div>
+        <div class="user-info">
+          <h3>{{ currentUser()?.displayName }}</h3>
+          <p>{{ currentUser()?.email }}</p>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="onLogout()" title="Đăng xuất">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+
+    <app-chat-list
+      [users]="users()"
+      [selectedUser]="selectedUser()"
+      [isLoading]="isLoading()"
+      (userSelected)="onUserSelected($event)"
+    ></app-chat-list>
+  </div>
+
+  <!-- Main Chat Window -->
+  <div class="chat-main">
+    @if (selectedUser()) {
+      <app-chat-window
+        [selectedUser]="selectedUser()!"
+        [currentUser]="currentUser()!"
+      ></app-chat-window>
+    } @else {
+      <div class="no-chat-selected">
+        <div class="empty-state">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <h2>Chọn một cuộc trò chuyện</h2>
+          <p>Chọn một người dùng từ danh sách bên trái để bắt đầu trò chuyện</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

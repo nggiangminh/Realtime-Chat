@@ -48,8 +48,13 @@
 .user-status {
   margin: 2px 0 0 0;
   font-size: 13px;
-  color: #22c55e;
+  color: #9ca3af;
   font-weight: 500;
+  transition: color var(--transition-base);
+}
+
+.user-status.online {
+  color: #22c55e;
 }
 
 /* Messages Container - Scrollable area between header and input */

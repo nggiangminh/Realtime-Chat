@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedUser!: User;
   @Input() currentUser!: User;
+  @Input() userStatusMap: Map<number, 'ONLINE' | 'OFFLINE'> = new Map();
 
   messages = signal<Message[]>([]);
   messageInput = signal<string>('');
@@ -150,6 +151,14 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
 
   getUserInitial(displayName: string): string {
     return displayName.charAt(0).toUpperCase();
+  }
+
+  isUserOnline(): boolean {
+    return this.userStatusMap.get(this.selectedUser.id) === 'ONLINE';
+  }
+
+  getUserStatus(): string {
+    return this.isUserOnline() ? 'Đang hoạt động' : 'Không hoạt động';
   }
 
   private scrollToBottom(): void {

@@ -14,6 +14,7 @@ export class ChatListComponent {
   @Input() users: User[] = [];
   @Input() selectedUser: User | null = null;
   @Input() isLoading: boolean = false;
+  @Input() userStatusMap: Map<number, 'ONLINE' | 'OFFLINE'> = new Map();
   @Output() userSelected = new EventEmitter<User>();
 
   searchQuery = signal<string>('');
@@ -44,5 +45,9 @@ export class ChatListComponent {
 
   getUserInitial(displayName: string): string {
     return displayName.charAt(0).toUpperCase();
+  }
+
+  isUserOnline(userId: number): boolean {
+    return this.userStatusMap.get(userId) === 'ONLINE';
   }
 }

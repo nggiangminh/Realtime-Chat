@@ -14,6 +14,6 @@ export interface User {
  */
 export interface UserStatus {
   userId: number;
+  displayName: string;
   status: 'ONLINE' | 'OFFLINE';
-  lastSeen?: string;
 }

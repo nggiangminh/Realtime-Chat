@@ -45,6 +45,7 @@
       [users]="users()"
       [selectedUser]="selectedUser()"
       [isLoading]="isLoading()"
+      [userStatusMap]="userStatusMap()"
       (userSelected)="onUserSelected($event)"
     ></app-chat-list>
   </div>
@@ -55,6 +56,7 @@
       <app-chat-window
         [selectedUser]="selectedUser()!"
         [currentUser]="currentUser()!"
+        [userStatusMap]="userStatusMap()"
       ></app-chat-window>
     } @else {
       <div class="no-chat-selected">

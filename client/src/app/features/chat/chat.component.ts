@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService, WebSocketService, UserService, ThemeService } from '../../core/services';
-import { User } from '../../core/models';
+import { User, UserStatus } from '../../core/models';
 import { ChatListComponent } from './chat-list/chat-list.component';
 import { ChatWindowComponent } from './chat-window/chat-window.component';
 
@@ -17,6 +18,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   selectedUser = signal<User | null>(null);
   users = signal<User[]>([]);
   isLoading = signal<boolean>(true);
+  userStatusMap = signal<Map<number, 'ONLINE' | 'OFFLINE'>>(new Map());
+
+  private statusSubscription?: Subscription;
 
   constructor(
     public authService: AuthService,
@@ -36,9 +40,26 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     // Load users list
     this.loadUsers();
+
+    // Subscribe to user status updates
+    this.statusSubscription = this.webSocketService.userStatus$.subscribe({
+      next: (status: UserStatus) => {
+        console.log('Received user status update:', status);
+        const statusMap = this.userStatusMap();
+        statusMap.set(status.userId, status.status);
+        this.userStatusMap.set(new Map(statusMap));
+      },
+      error: (error: any) => {
+        console.error('Error receiving status update:', error);
+      }
+    });
   }
 
   ngOnDestroy(): void {
+    // Unsubscribe from status updates
+    if (this.statusSubscription) {
+      this.statusSubscription.unsubscribe();
+    }
     // Disconnect WebSocket when component is destroyed
     this.webSocketService.disconnect();
   }

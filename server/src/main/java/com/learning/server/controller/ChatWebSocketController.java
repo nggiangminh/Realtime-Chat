@@ -1,12 +1,10 @@
 package com.learning.server.controller;
 
-import com.learning.server.dto.websocket.ChatMessageDTO;
-import com.learning.server.dto.websocket.MessageResponseDTO;
-import com.learning.server.dto.websocket.TypingNotificationDTO;
-import com.learning.server.dto.websocket.UserStatusDTO;
+import com.learning.server.dto.websocket.*;
 import com.learning.server.entity.User;
 import com.learning.server.repository.UserRepository;
 import com.learning.server.security.JwtTokenProvider;
+import com.learning.server.service.MessageReactionService;
 import com.learning.server.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +30,9 @@ public class ChatWebSocketController {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private MessageReactionService reactionService;
 
     @Autowired
     private UserRepository userRepository;
@@ -193,6 +194,46 @@ public class ChatWebSocketController {
 
         } catch (Exception e) {
             log.error("Lỗi khi xử lý user disconnect: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Xử lý toggle reaction (thêm/xóa)
+     * Mapping: /app/chat.toggleReaction
+     */
+    @MessageMapping("/chat.toggleReaction")
+    public void toggleReaction(@Payload ReactionDTO reactionDTO, Principal principal) {
+        try {
+            log.info("Nhận reaction từ user: {}, message: {}, emoji: {}",
+                    principal.getName(), reactionDTO.messageId(), reactionDTO.emoji());
+
+            // Lấy thông tin user từ JWT token
+            String userEmail = principal.getName();
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+
+            // Toggle reaction
+            ReactionResponseDTO response = reactionService.toggleReaction(
+                    reactionDTO.messageId(),
+                    user.getId(),
+                    reactionDTO.emoji()
+            );
+
+            // Broadcast reaction update to all users in the conversation
+            messagingTemplate.convertAndSend("/topic/reactions", response);
+
+            log.info("Reaction {} cho message {}: {}", 
+                    response.action(), response.messageId(), response.emoji());
+
+        } catch (Exception e) {
+            log.error("Lỗi khi xử lý reaction: {}", e.getMessage(), e);
+
+            // Gửi lỗi về cho client
+            messagingTemplate.convertAndSendToUser(
+                    principal.getName(),
+                    "/queue/errors",
+                    "Lỗi khi xử lý reaction: " + e.getMessage()
+            );
         }
     }
 

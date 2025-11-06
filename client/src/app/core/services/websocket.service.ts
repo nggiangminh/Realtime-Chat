@@ -3,7 +3,7 @@ import { Client, Message as StompMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { AuthService } from './auth.service';
-import { Message, UserStatus, TypingNotification } from '../models';
+import { Message, UserStatus, TypingNotification, ReactionResponse } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -17,11 +17,13 @@ export class WebSocketService {
   private messageSubject = new Subject<Message>();
   private userStatusSubject = new Subject<UserStatus>();
   private typingSubject = new Subject<TypingNotification>();
+  private reactionSubject = new Subject<ReactionResponse>();
 
   public isConnected$ = this.connectionStatus.asObservable();
   public messages$ = this.messageSubject.asObservable();
   public userStatus$ = this.userStatusSubject.asObservable();
   public typing$ = this.typingSubject.asObservable();
+  public reactions$ = this.reactionSubject.asObservable();
 
   constructor(private authService: AuthService) {}
 
@@ -93,6 +95,12 @@ export class WebSocketService {
       const typingData: TypingNotification = JSON.parse(message.body);
       this.typingSubject.next(typingData);
     });
+
+    // Subscribe to reaction updates
+    this.stompClient.subscribe('/topic/reactions', (message: StompMessage) => {
+      const reactionData: ReactionResponse = JSON.parse(message.body);
+      this.reactionSubject.next(reactionData);
+    });
   }
 
   /**
@@ -128,6 +136,24 @@ export class WebSocketService {
       body: JSON.stringify({
         receiverId: receiverId,
         isTyping: isTyping
+      })
+    });
+  }
+
+  /**
+   * Toggle reaction cho message
+   */
+  toggleReaction(messageId: number, emoji: string): void {
+    if (!this.stompClient || !this.connectionStatus.value) {
+      console.error('WebSocket not connected');
+      return;
+    }
+
+    this.stompClient.publish({
+      destination: '/app/chat.toggleReaction',
+      body: JSON.stringify({
+        messageId: messageId,
+        emoji: emoji
       })
     });
   }

@@ -1,7 +1,7 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, signal } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { User, Message } from '../../../core/models';
+import { User, Message, ReactionResponse } from '../../../core/models';
 import { WebSocketService, MessageService, FileUploadService } from '../../../core/services';
 import { Subscription } from 'rxjs';
 
@@ -24,8 +24,13 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
   isUploading = signal<boolean>(false);
   selectedImage = signal<File | null>(null);
   imagePreviewUrl = signal<string | null>(null);
+  showReactionPicker = signal<number | null>(null); // messageId hoặc null
+
+  // Danh sách emoji phổ biến
+  popularEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
   private messageSubscription?: Subscription;
+  private reactionSubscription?: Subscription;
 
   constructor(
     private webSocketService: WebSocketService,
@@ -56,10 +61,22 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
     }
     // Subscribe to real-time messages
     this.subscribeToMessages();
+    // Subscribe to reactions
+    this.subscribeToReactions();
   }
 
   ngOnDestroy(): void {
     this.messageSubscription?.unsubscribe();
+    this.reactionSubscription?.unsubscribe();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    // Close reaction picker when clicking outside
+    const target = event.target as HTMLElement;
+    if (!target.closest('.reaction-picker') && !target.closest('.btn-add-reaction')) {
+      this.showReactionPicker.set(null);
+    }
   }
 
   loadMessageHistory(): void {
@@ -111,6 +128,43 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
         }
       }
     });
+  }
+
+  subscribeToReactions(): void {
+    this.reactionSubscription = this.webSocketService.reactions$.subscribe({
+      next: (reactionResponse: ReactionResponse) => {
+        console.log('Received reaction update:', reactionResponse);
+        
+        // Update reactions in the message
+        this.messages.update(msgs => 
+          msgs.map(msg => 
+            msg.id === reactionResponse.messageId 
+              ? { ...msg, reactions: reactionResponse.reactionCounts }
+              : msg
+          )
+        );
+      }
+    });
+  }
+
+  toggleReaction(messageId: number, emoji: string): void {
+    console.log('Toggle reaction:', messageId, emoji);
+    this.webSocketService.toggleReaction(messageId, emoji);
+    this.showReactionPicker.set(null); // Close picker after selection
+  }
+
+  toggleReactionPicker(messageId: number, event: Event): void {
+    event.stopPropagation();
+    if (this.showReactionPicker() === messageId) {
+      this.showReactionPicker.set(null);
+    } else {
+      this.showReactionPicker.set(messageId);
+    }
+  }
+
+  getReactionEntries(reactions: { [emoji: string]: number } | undefined): [string, number][] {
+    if (!reactions) return [];
+    return Object.entries(reactions);
   }
 
   sendMessage(): void {

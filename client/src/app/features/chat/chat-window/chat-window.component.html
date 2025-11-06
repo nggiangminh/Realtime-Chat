@@ -46,6 +46,55 @@
                 <p class="message-content">{{ message.content }}</p>
               }
               <span class="message-time">{{ formatTime(message.sentAt) }}</span>
+              
+              <!-- Reactions Display - CHỈ 1 REACTION DUY NHẤT -->
+              @if (message.reactions && getReactionEntries(message.reactions).length > 0) {
+                <div class="reactions-display">
+                  @for (entry of getReactionEntries(message.reactions); track entry[0]) {
+                    <button 
+                      class="reaction-item clickable"
+                      (click)="toggleReaction(message.id, entry[0])"
+                      title="Click để bỏ reaction"
+                    >
+                      <span class="emoji">{{ entry[0] }}</span>
+                      <span class="count">{{ entry[1] }}</span>
+                    </button>
+                  }
+                </div>
+              }
+              
+              <!-- Reaction Button -->
+              <button 
+                class="btn-add-reaction" 
+                (click)="toggleReactionPicker(message.id, $event)"
+                title="Thêm reaction"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                  <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                  <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                </svg>
+              </button>
+              
+              <!-- Reaction Picker - Chọn emoji sẽ THAY THẾ reaction cũ -->
+              @if (showReactionPicker() === message.id) {
+                <div class="reaction-picker" (click)="$event.stopPropagation()">
+                  <div class="picker-header">
+                    <span>Chọn reaction (sẽ thay thế reaction cũ)</span>
+                  </div>
+                  <div class="emoji-list">
+                    @for (emoji of popularEmojis; track emoji) {
+                      <button 
+                        class="emoji-btn"
+                        (click)="toggleReaction(message.id, emoji)"
+                      >
+                        {{ emoji }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
             </div>
           </div>
         }

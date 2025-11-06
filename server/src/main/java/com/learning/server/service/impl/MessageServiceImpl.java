@@ -3,6 +3,7 @@ package com.learning.server.service.impl;
 import com.learning.server.dto.websocket.MessageResponseDTO;
 import com.learning.server.entity.Message;
 import com.learning.server.entity.User;
+import com.learning.server.repository.MessageReactionRepository;
 import com.learning.server.repository.MessageRepository;
 import com.learning.server.repository.UserRepository;
 import com.learning.server.service.MessageService;
@@ -10,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +25,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     private MessageRepository messageRepository;
+
+    @Autowired
+    private MessageReactionRepository reactionRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -154,6 +160,9 @@ public class MessageServiceImpl implements MessageService {
      * Convert Message entity to MessageResponseDTO with sender display name
      */
     private MessageResponseDTO convertToResponseDTO(Message message, String senderDisplayName) {
+        // Get reaction counts for this message
+        Map<String, Integer> reactions = getReactionCounts(message.getId());
+        
         return new MessageResponseDTO(
                 message.getId(),
                 message.getSenderId(),
@@ -163,7 +172,24 @@ public class MessageServiceImpl implements MessageService {
                 message.getIsRead(),
                 senderDisplayName,
                 message.getMessageType() != null ? message.getMessageType().name() : "TEXT",
-                message.getImageUrl()
+                message.getImageUrl(),
+                reactions
         );
+    }
+
+    /**
+     * Get reaction counts for a message
+     */
+    private Map<String, Integer> getReactionCounts(Long messageId) {
+        List<Object[]> results = reactionRepository.countReactionsByMessageId(messageId);
+        Map<String, Integer> counts = new HashMap<>();
+        
+        for (Object[] result : results) {
+            String emoji = (String) result[0];
+            Long count = (Long) result[1];
+            counts.put(emoji, count.intValue());
+        }
+        
+        return counts;
     }
 }

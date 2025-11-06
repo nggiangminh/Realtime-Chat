@@ -1,6 +1,7 @@
 package com.learning.server.dto.websocket;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * DTO response cho tin nhắn qua WebSocket
@@ -15,7 +16,8 @@ public record MessageResponseDTO(
         Boolean isRead,
         String senderDisplayName,
         String messageType,
-        String imageUrl
+        String imageUrl,
+        Map<String, Integer> reactions // emoji -> count
 ) {
     /**
      * Compact constructor để validate input

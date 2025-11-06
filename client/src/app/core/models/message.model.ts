@@ -10,6 +10,7 @@ export interface Message {
   isRead: boolean;
   messageType?: 'TEXT' | 'IMAGE';
   imageUrl?: string;
+  reactions?: { [emoji: string]: number }; // emoji -> count
 }
 
 /**
@@ -20,6 +21,26 @@ export interface ChatMessageDTO {
   content: string;
   messageType?: string;
   imageUrl?: string;
+}
+
+/**
+ * Reaction DTO - Dùng để toggle reaction
+ */
+export interface ReactionDTO {
+  messageId: number;
+  emoji: string;
+}
+
+/**
+ * Reaction Response - Nhận từ server
+ */
+export interface ReactionResponse {
+  messageId: number;
+  userId: number;
+  userDisplayName: string;
+  emoji: string;
+  action: 'ADD' | 'REMOVE';
+  reactionCounts: { [emoji: string]: number };
 }
 
 /**

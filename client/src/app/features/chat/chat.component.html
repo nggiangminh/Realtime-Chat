@@ -57,6 +57,7 @@
         [selectedUser]="selectedUser()!"
         [currentUser]="currentUser()!"
         [userStatusMap]="userStatusMap()"
+        (backToList)="onBackToList()"
       ></app-chat-window>
     } @else {
       <div class="no-chat-selected">

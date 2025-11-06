@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, signal, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User, Message, ReactionResponse } from '../../../core/models';
@@ -16,6 +16,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedUser!: User;
   @Input() currentUser!: User;
   @Input() userStatusMap: Map<number, 'ONLINE' | 'OFFLINE'> = new Map();
+  @Output() backToList = new EventEmitter<void>();
 
   messages = signal<Message[]>([]);
   messageInput = signal<string>('');
@@ -331,6 +332,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
 
   getUserStatus(): string {
     return this.isUserOnline() ? 'Đang hoạt động' : 'Không hoạt động';
+  }
+
+  onBackToList(): void {
+    this.backToList.emit();
   }
 
   private scrollToBottom(): void {

@@ -16,6 +16,32 @@
   top: 0;
   z-index: 10;
   transition: background-color var(--transition-base), border-color var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Back button - ẩn trên desktop, chỉ hiện trên mobile */
+.btn-back {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background: var(--bg-secondary);
+}
+
+.btn-back:active {
+  transform: scale(0.95);
 }
 
 .header-user {
@@ -621,6 +647,11 @@
 }
 
 @media (max-width: 640px) {
+  /* Hiện nút back trên mobile */
+  .btn-back {
+    display: flex;
+  }
+  
   .chat-header {
     padding: 12px;
     position: fixed;

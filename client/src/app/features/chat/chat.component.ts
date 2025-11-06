@@ -90,6 +90,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.selectedUser.set(user);
   }
 
+  onBackToList(): void {
+    this.selectedUser.set(null);
+  }
+
   toggleTheme(): void {
     this.themeService.toggleTheme();
   }

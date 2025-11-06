@@ -174,22 +174,29 @@
     position: relative;
   }
   
-  /* Hide sidebar when chat is open on mobile */
   .chat-sidebar {
-    position: absolute;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 100%;
-    z-index: 1000;
+    height: 100vh;
+    z-index: 1001;
+    transform: translateX(0);
     transition: transform 0.3s ease;
   }
   
-  /* Show sidebar by default if no chat selected */
-  .chat-main:not(:empty) ~ .chat-sidebar {
+  /* Ẩn sidebar khi đã chọn user để chat */
+  .chat-container:has(.chat-main app-chat-window) .chat-sidebar {
     transform: translateX(-100%);
   }
   
   .chat-main {
     width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
   
   .empty-state h2 {

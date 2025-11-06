@@ -48,6 +48,9 @@ public class Message {
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
 
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
     /**
      * Enum cho loại tin nhắn
      */
@@ -73,6 +76,9 @@ public class Message {
         sentAt = LocalDateTime.now();
         if (isRead == null) {
             isRead = false;
+        }
+        if (isDeleted == null) {
+            isDeleted = false;
         }
         if (messageType == null) {
             messageType = MessageType.TEXT;

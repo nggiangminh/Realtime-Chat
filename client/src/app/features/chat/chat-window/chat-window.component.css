@@ -217,40 +217,54 @@
 }
 
 /* Add Reaction Button */
-.btn-add-reaction {
+.message-actions {
   position: absolute;
-  bottom: -8px;
-  left: -8px;
-  width: 28px;
-  height: 28px;
+  bottom: -10px;
+  left: -10px;
+  display: none;
+  gap: 6px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+/* Message actions cho tin nhắn đã gửi (bên phải) - hiển thị bên trái bubble */
+.message-wrapper.sent .message-actions {
+  left: auto;
+  right: -10px;
+}
+
+.message-bubble:hover .message-actions {
+  display: flex;
+  opacity: 1;
+}
+
+.btn-add-reaction,
+.btn-delete-message {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid var(--border-color);
   background: var(--bg-primary);
   color: var(--text-secondary);
   cursor: pointer;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 5;
-}
-
-/* Nút reaction cho tin nhắn đã gửi (bên phải) - hiển thị bên trái bubble */
-.message-wrapper.sent .btn-add-reaction {
-  left: auto;
-  right: -8px;
-}
-
-.message-bubble:hover .btn-add-reaction {
-  display: flex;
-  opacity: 1;
 }
 
 .btn-add-reaction:hover {
   background: var(--color-primary);
   border-color: var(--color-primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.btn-delete-message:hover {
+  background: #ef4444;
+  border-color: #ef4444;
   color: white;
   transform: scale(1.1);
 }
@@ -385,7 +399,7 @@
   bottom: 0;
   left: 360px; /* Sidebar width */
   right: 0;
-  padding: 0 24px 20px;
+  padding: 16px 24px 20px;
   border-top: 1px solid var(--border-color);
   background: var(--bg-primary);
   z-index: 100;

@@ -18,12 +18,14 @@ export class WebSocketService {
   private userStatusSubject = new Subject<UserStatus>();
   private typingSubject = new Subject<TypingNotification>();
   private reactionSubject = new Subject<ReactionResponse>();
+  private messageDeleteSubject = new Subject<{ messageId: number, deletedBy: number }>();
 
   public isConnected$ = this.connectionStatus.asObservable();
   public messages$ = this.messageSubject.asObservable();
   public userStatus$ = this.userStatusSubject.asObservable();
   public typing$ = this.typingSubject.asObservable();
   public reactions$ = this.reactionSubject.asObservable();
+  public messageDeletes$ = this.messageDeleteSubject.asObservable();
 
   constructor(private authService: AuthService) {}
 
@@ -101,6 +103,12 @@ export class WebSocketService {
       const reactionData: ReactionResponse = JSON.parse(message.body);
       this.reactionSubject.next(reactionData);
     });
+
+    // Subscribe to message delete notifications
+    this.stompClient.subscribe('/topic/messages/delete', (message: StompMessage) => {
+      const deleteData: { messageId: number, deletedBy: number } = JSON.parse(message.body);
+      this.messageDeleteSubject.next(deleteData);
+    });
   }
 
   /**
@@ -154,6 +162,23 @@ export class WebSocketService {
       body: JSON.stringify({
         messageId: messageId,
         emoji: emoji
+      })
+    });
+  }
+
+  /**
+   * Xóa tin nhắn qua WebSocket
+   */
+  deleteMessage(messageId: number): void {
+    if (!this.stompClient || !this.connectionStatus.value) {
+      console.error('WebSocket not connected');
+      return;
+    }
+
+    this.stompClient.publish({
+      destination: '/app/chat.deleteMessage',
+      body: JSON.stringify({
+        messageId: messageId
       })
     });
   }

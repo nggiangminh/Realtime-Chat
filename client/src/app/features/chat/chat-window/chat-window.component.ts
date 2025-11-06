@@ -31,6 +31,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
 
   private messageSubscription?: Subscription;
   private reactionSubscription?: Subscription;
+  private messageDeleteSubscription?: Subscription;
 
   constructor(
     private webSocketService: WebSocketService,
@@ -63,11 +64,14 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
     this.subscribeToMessages();
     // Subscribe to reactions
     this.subscribeToReactions();
+    // Subscribe to message deletes
+    this.subscribeToMessageDeletes();
   }
 
   ngOnDestroy(): void {
     this.messageSubscription?.unsubscribe();
     this.reactionSubscription?.unsubscribe();
+    this.messageDeleteSubscription?.unsubscribe();
   }
 
   @HostListener('document:click', ['$event'])
@@ -145,6 +149,26 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
         );
       }
     });
+  }
+
+  subscribeToMessageDeletes(): void {
+    this.messageDeleteSubscription = this.webSocketService.messageDeletes$.subscribe({
+      next: (deleteData: { messageId: number, deletedBy: number }) => {
+        console.log('Received message delete notification:', deleteData);
+        
+        // Remove deleted message from UI
+        this.messages.update(msgs => 
+          msgs.filter(msg => msg.id !== deleteData.messageId)
+        );
+      }
+    });
+  }
+
+  deleteMessage(messageId: number): void {
+    if (confirm('Bạn có chắc chắn muốn xóa tin nhắn này? Cả bạn và người nhận đều sẽ không thấy tin nhắn này nữa.')) {
+      console.log('Deleting message:', messageId);
+      this.webSocketService.deleteMessage(messageId);
+    }
   }
 
   toggleReaction(messageId: number, emoji: string): void {

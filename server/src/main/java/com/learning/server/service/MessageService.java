@@ -51,4 +51,9 @@ public interface MessageService {
      * Lấy tin nhắn mới nhất giữa 2 users
      */
     MessageResponseDTO getLatestMessage(Long userId1, Long userId2);
+
+    /**
+     * Xóa tin nhắn (soft delete) - cả người gửi và người nhận đều không thấy
+     */
+    void deleteMessage(Long messageId, Long currentUserId);
 }

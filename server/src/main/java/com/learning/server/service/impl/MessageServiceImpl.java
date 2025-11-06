@@ -192,4 +192,21 @@ public class MessageServiceImpl implements MessageService {
         
         return counts;
     }
+
+    @Override
+    @Transactional
+    public void deleteMessage(Long messageId, Long currentUserId) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("Tin nhắn không tồn tại"));
+
+        // Chỉ người gửi hoặc người nhận mới có thể xóa
+        if (!message.getSenderId().equals(currentUserId) && 
+            !message.getReceiverId().equals(currentUserId)) {
+            throw new IllegalArgumentException("Không có quyền xóa tin nhắn này");
+        }
+
+        // Soft delete - đánh dấu là đã xóa
+        message.setIsDeleted(true);
+        messageRepository.save(message);
+    }
 }

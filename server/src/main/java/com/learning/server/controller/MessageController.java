@@ -222,4 +222,36 @@ public class MessageController {
                     .body(new ApiResponse<>("ERROR", "Lỗi khi đếm tin nhắn chưa đọc: " + e.getMessage(), null));
         }
     }
+
+    /**
+     * Xóa tin nhắn (soft delete)
+     * DELETE /api/messages/{messageId}
+     * Cả người gửi và người nhận đều không thấy tin nhắn sau khi xóa
+     */
+    @DeleteMapping("/{messageId}")
+    public ResponseEntity<ApiResponse<Void>> deleteMessage(
+            @PathVariable Long messageId,
+            Authentication authentication) {
+
+        try {
+            log.info("Xóa tin nhắn: {}", messageId);
+
+            // Lấy current user ID từ JWT authentication
+            Long currentUserId = getCurrentUserId(authentication);
+
+            messageService.deleteMessage(messageId, currentUserId);
+
+            log.info("Xóa tin nhắn {} thành công", messageId);
+            return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Xóa tin nhắn thành công", null));
+
+        } catch (IllegalArgumentException e) {
+            log.warn("Lỗi validation khi xóa tin nhắn: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>("ERROR", e.getMessage(), null));
+        } catch (Exception e) {
+            log.error("Lỗi khi xóa tin nhắn: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>("ERROR", "Lỗi server: " + e.getMessage(), null));
+        }
+    }
 }

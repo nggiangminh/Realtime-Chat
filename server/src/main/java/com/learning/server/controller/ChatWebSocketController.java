@@ -238,6 +238,44 @@ public class ChatWebSocketController {
     }
 
     /**
+     * Xử lý xóa tin nhắn qua WebSocket
+     * Mapping: /app/chat.deleteMessage
+     */
+    @MessageMapping("/chat.deleteMessage")
+    public void deleteMessage(@Payload MessageDeleteDTO deleteDTO, Principal principal) {
+        try {
+            log.info("Nhận yêu cầu xóa tin nhắn {} từ user: {}", 
+                    deleteDTO.getMessageId(), principal.getName());
+
+            // Lấy thông tin user từ JWT token
+            String userEmail = principal.getName();
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+
+            // Xóa tin nhắn (soft delete)
+            messageService.deleteMessage(deleteDTO.getMessageId(), user.getId());
+
+            // Set deletedBy
+            deleteDTO.setDeletedBy(user.getId());
+
+            // Broadcast delete notification to all users
+            messagingTemplate.convertAndSend("/topic/messages/delete", deleteDTO);
+
+            log.info("Đã xóa tin nhắn {} thành công", deleteDTO.getMessageId());
+
+        } catch (Exception e) {
+            log.error("Lỗi khi xóa tin nhắn: {}", e.getMessage(), e);
+
+            // Gửi lỗi về cho client
+            messagingTemplate.convertAndSendToUser(
+                    principal.getName(),
+                    "/queue/errors",
+                    "Lỗi khi xóa tin nhắn: " + e.getMessage()
+            );
+        }
+    }
+
+    /**
      * Inner DTO class cho typing response
      */
     public record TypingResponseDTO(

@@ -1,8 +1,6 @@
-
-
 package com.learning.server.dto.websocket;
 
-import jakarta.validation.constraints.NotEmpty;
+import com.learning.server.entity.Message;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -13,8 +11,11 @@ public record ChatMessageDTO(
         @NotNull(message = "ID người nhận không được để trống")
         Long receiverId,
 
-        @NotEmpty(message = "Nội dung tin nhắn không được để trống")
-        String content
+        String content,
+
+        String messageType,
+
+        String imageUrl
 ) {
     /**
      * Compact constructor để validate input
@@ -23,8 +24,27 @@ public record ChatMessageDTO(
         if (receiverId == null) {
             throw new IllegalArgumentException("ID người nhận không được để trống");
         }
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nội dung tin nhắn không được để trống");
+        
+        // Validate based on message type
+        if ("IMAGE".equals(messageType)) {
+            if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                throw new IllegalArgumentException("URL ảnh không được để trống khi gửi ảnh");
+            }
+        } else {
+            // Default to TEXT
+            if (content == null || content.trim().isEmpty()) {
+                throw new IllegalArgumentException("Nội dung tin nhắn không được để trống");
+            }
         }
+    }
+
+    /**
+     * Helper method to get MessageType enum
+     */
+    public Message.MessageType getMessageTypeEnum() {
+        if ("IMAGE".equals(messageType)) {
+            return Message.MessageType.IMAGE;
+        }
+        return Message.MessageType.TEXT;
     }
 }

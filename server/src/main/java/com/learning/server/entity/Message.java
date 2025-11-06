@@ -33,14 +33,28 @@ public class Message {
     private Long receiverId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    @NotEmpty(message = "Nội dung tin nhắn không được để trống")
     private String content;
+
+    @Column(name = "message_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MessageType messageType = MessageType.TEXT;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @Column(name = "sent_at", nullable = false, updatable = false)
     private LocalDateTime sentAt;
 
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
+
+    /**
+     * Enum cho loại tin nhắn
+     */
+    public enum MessageType {
+        TEXT,
+        IMAGE
+    }
 
     // Lazy loading relationships
     @ManyToOne(fetch = FetchType.LAZY)
@@ -59,6 +73,9 @@ public class Message {
         sentAt = LocalDateTime.now();
         if (isRead == null) {
             isRead = false;
+        }
+        if (messageType == null) {
+            messageType = MessageType.TEXT;
         }
     }
 

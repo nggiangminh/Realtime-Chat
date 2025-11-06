@@ -17,6 +17,12 @@ public interface MessageService {
     MessageResponseDTO saveMessage(Long senderId, Long receiverId, String content);
 
     /**
+     * Lưu tin nhắn mới với messageType và imageUrl
+     */
+    MessageResponseDTO saveMessage(Long senderId, Long receiverId, String content, 
+                                  Message.MessageType messageType, String imageUrl);
+
+    /**
      * Lấy lịch sử chat giữa current user và user khác
      */
     List<MessageResponseDTO> getChatHistory(Long currentUserId, Long otherUserId);

@@ -8,6 +8,8 @@ export interface Message {
   content: string;
   sentAt: string;
   isRead: boolean;
+  messageType?: 'TEXT' | 'IMAGE';
+  imageUrl?: string;
 }
 
 /**
@@ -16,6 +18,8 @@ export interface Message {
 export interface ChatMessageDTO {
   receiverId: number;
   content: string;
+  messageType?: string;
+  imageUrl?: string;
 }
 
 /**

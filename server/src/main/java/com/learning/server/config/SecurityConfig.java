@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers("/api/test/public").permitAll() // Test endpoint
                 .requestMatchers("/ws/**").permitAll() // WebSocket endpoint
+                .requestMatchers("/api/files/**").permitAll() // File upload/download endpoints
                 .requestMatchers("/error").permitAll()
 
                 // Tất cả endpoints khác cần authentication

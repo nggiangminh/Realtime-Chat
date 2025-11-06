@@ -29,6 +29,13 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public MessageResponseDTO saveMessage(Long senderId, Long receiverId, String content) {
+        return saveMessage(senderId, receiverId, content, Message.MessageType.TEXT, null);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponseDTO saveMessage(Long senderId, Long receiverId, String content, 
+                                        Message.MessageType messageType, String imageUrl) {
         // Validate users exist
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("Người gửi không tồn tại"));
@@ -36,7 +43,14 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new IllegalArgumentException("Người nhận không tồn tại"));
 
         // Tạo và lưu message
-        Message message = new Message(senderId, receiverId, content);
+        Message message = new Message();
+        message.setSenderId(senderId);
+        message.setReceiverId(receiverId);
+        message.setContent(content != null ? content : "");
+        message.setMessageType(messageType);
+        message.setImageUrl(imageUrl);
+        message.setIsRead(false);
+        
         Message savedMessage = messageRepository.save(message);
 
         return convertToResponseDTO(savedMessage, sender.getDisplayName());
@@ -147,7 +161,9 @@ public class MessageServiceImpl implements MessageService {
                 message.getContent(),
                 message.getSentAt(),
                 message.getIsRead(),
-                senderDisplayName
+                senderDisplayName,
+                message.getMessageType() != null ? message.getMessageType().name() : "TEXT",
+                message.getImageUrl()
         );
     }
 }

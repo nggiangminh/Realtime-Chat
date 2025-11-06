@@ -13,7 +13,9 @@ public record MessageResponseDTO(
         String content,
         LocalDateTime sentAt,
         Boolean isRead,
-        String senderDisplayName
+        String senderDisplayName,
+        String messageType,
+        String imageUrl
 ) {
     /**
      * Compact constructor để validate input
@@ -25,9 +27,7 @@ public record MessageResponseDTO(
         if (receiverId == null) {
             throw new IllegalArgumentException("ID người nhận không được để trống");
         }
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nội dung tin nhắn không được để trống");
-        }
+        // Content can be empty for image messages
         if (sentAt == null) {
             throw new IllegalArgumentException("Thời gian gửi không được để trống");
         }

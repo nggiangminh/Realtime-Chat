@@ -46,7 +46,8 @@ public class ChatWebSocketController {
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessageDTO chatMessage, Principal principal) {
         try {
-            log.info("Nhận tin nhắn từ user: {}, tới user: {}", principal.getName(), chatMessage.receiverId());
+            log.info("Nhận tin nhắn từ user: {}, tới user: {}, type: {}", 
+                    principal.getName(), chatMessage.receiverId(), chatMessage.messageType());
 
             // Lấy thông tin sender từ JWT token
             String senderEmail = principal.getName();
@@ -62,11 +63,13 @@ public class ChatWebSocketController {
                 throw new IllegalArgumentException("Không thể gửi tin nhắn cho chính mình");
             }
 
-            // Lưu tin nhắn vào database
+            // Lưu tin nhắn vào database (với messageType và imageUrl)
             MessageResponseDTO savedMessage = messageService.saveMessage(
                     sender.getId(),
                     chatMessage.receiverId(),
-                    chatMessage.content()
+                    chatMessage.content(),
+                    chatMessage.getMessageTypeEnum(),
+                    chatMessage.imageUrl()
             );
 
             // Gửi tin nhắn tới người nhận qua user-specific queue

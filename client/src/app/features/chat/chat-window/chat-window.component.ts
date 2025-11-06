@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, signal }
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User, Message } from '../../../core/models';
-import { WebSocketService, MessageService } from '../../../core/services';
+import { WebSocketService, MessageService, FileUploadService } from '../../../core/services';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -21,12 +21,16 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
   messageInput = signal<string>('');
   isLoading = signal<boolean>(true);
   isSending = signal<boolean>(false);
+  isUploading = signal<boolean>(false);
+  selectedImage = signal<File | null>(null);
+  imagePreviewUrl = signal<string | null>(null);
 
   private messageSubscription?: Subscription;
 
   constructor(
     private webSocketService: WebSocketService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private fileUploadService: FileUploadService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -88,6 +92,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
     this.messageSubscription = this.webSocketService.messages$.subscribe({
       next: (message) => {
         console.log('Received WebSocket message:', message);
+        console.log('Message type:', message.messageType, 'Image URL:', message.imageUrl);
         
         // Only add message if it's from or to the selected user
         if (
@@ -109,6 +114,13 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   sendMessage(): void {
+    // If there's an image, send image message
+    if (this.selectedImage()) {
+      this.sendImageMessage();
+      return;
+    }
+
+    // Send text message
     const content = this.messageInput().trim();
     if (!content || this.isSending()) return;
 
@@ -120,12 +132,94 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
     this.messageInput.set('');
     
     // Send via WebSocket
-    this.webSocketService.sendMessage(this.selectedUser.id, content);
+    this.webSocketService.sendMessage(this.selectedUser.id, content, 'TEXT');
     
     // Reset sending state after a short delay
     setTimeout(() => {
       this.isSending.set(false);
     }, 500);
+  }
+
+  sendImageMessage(): void {
+    const file = this.selectedImage();
+    if (!file || this.isUploading()) return;
+
+    this.isUploading.set(true);
+
+    // Upload image first
+    this.fileUploadService.uploadImage(file).subscribe({
+      next: (response) => {
+        console.log('Image uploaded:', response);
+        
+        if ((response.result === 'SUCCESS' || response.success) && response.data) {
+          const imageUrl = response.data.imageUrl;
+          const caption = this.messageInput().trim();
+          
+          // Send image message via WebSocket
+          this.webSocketService.sendMessage(
+            this.selectedUser.id, 
+            caption || 'Đã gửi một ảnh',
+            'IMAGE',
+            imageUrl
+          );
+
+          // Clear input and image
+          this.messageInput.set('');
+          this.clearSelectedImage();
+        }
+        
+        this.isUploading.set(false);
+      },
+      error: (error) => {
+        console.error('Error uploading image:', error);
+        alert('Lỗi khi upload ảnh. Vui lòng thử lại.');
+        this.isUploading.set(false);
+      }
+    });
+  }
+
+  onImageSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Vui lòng chọn file ảnh');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Kích thước ảnh không được vượt quá 5MB');
+        return;
+      }
+
+      this.selectedImage.set(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.imagePreviewUrl.set(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  clearSelectedImage(): void {
+    this.selectedImage.set(null);
+    this.imagePreviewUrl.set(null);
+    
+    // Reset file input
+    const fileInput = document.getElementById('imageInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  triggerImageSelect(): void {
+    const fileInput = document.getElementById('imageInput') as HTMLInputElement;
+    fileInput?.click();
   }
 
   onMessageInputChange(event: Event): void {

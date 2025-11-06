@@ -98,7 +98,7 @@ export class WebSocketService {
   /**
    * Gửi tin nhắn qua WebSocket
    */
-  sendMessage(receiverId: number, content: string): void {
+  sendMessage(receiverId: number, content: string, messageType: string = 'TEXT', imageUrl?: string): void {
     if (!this.stompClient || !this.connectionStatus.value) {
       console.error('WebSocket not connected');
       return;
@@ -108,7 +108,9 @@ export class WebSocketService {
       destination: '/app/chat.sendMessage',
       body: JSON.stringify({
         receiverId: receiverId,
-        content: content
+        content: content,
+        messageType: messageType,
+        imageUrl: imageUrl
       })
     });
   }

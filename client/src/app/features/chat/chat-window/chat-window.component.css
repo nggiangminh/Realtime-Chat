@@ -116,6 +116,22 @@
   color: white;
 }
 
+/* Message Image */
+.message-image {
+  max-width: 300px;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.message-image:hover {
+  transform: scale(1.02);
+}
+
 .message-content {
   margin: 0;
   font-size: 15px;
@@ -198,17 +214,86 @@
   bottom: 0;
   left: 360px; /* Sidebar width */
   right: 0;
-  padding: 20px 24px;
+  padding: 0 24px 20px;
   border-top: 1px solid var(--border-color);
   background: var(--bg-primary);
   z-index: 100;
   transition: background-color var(--transition-base), border-color var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Image Preview */
+.image-preview {
+  position: relative;
+  display: inline-block;
+  margin-top: 12px;
+  max-width: 200px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+}
+
+.btn-remove-image {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #ef4444;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-remove-image:hover {
+  background: #dc2626;
+  transform: scale(1.1);
 }
 
 .input-wrapper {
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.btn-image {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-image:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.btn-image:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .input-wrapper input {

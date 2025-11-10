@@ -143,6 +143,45 @@
   color: white;
 }
 
+/* Deleted Message Styles */
+.message-bubble.deleted {
+  background: transparent;
+  border: 1px dashed var(--border-color);
+  box-shadow: none;
+}
+
+.message-wrapper.sent .message-bubble.deleted {
+  background: transparent;
+  border: 1px dashed rgba(124, 58, 237, 0.3);
+}
+
+.deleted-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.deleted-message svg {
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.deleted-text {
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+
+.message-wrapper.sent .deleted-text {
+  color: var(--text-secondary);
+}
+
+/* Ẩn message actions cho tin nhắn đã xóa */
+.message-wrapper.deleted .message-actions {
+  display: none !important;
+}
+
 /* Message Image */
 .message-image {
   max-width: 300px;
@@ -720,5 +759,152 @@
   .btn-send {
     width: 40px;
     height: 40px;
+  }
+}
+
+/* Delete Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.delete-confirm-modal {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+  text-align: center;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-icon {
+  margin: 0 auto 20px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 50%;
+}
+
+.delete-confirm-modal h3 {
+  margin: 0 0 12px 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.delete-confirm-modal p {
+  margin: 0 0 28px 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-cancel,
+.btn-confirm-delete {
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  min-width: 120px;
+}
+
+.btn-cancel {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+
+.btn-cancel:hover {
+  background: var(--bg-tertiary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-confirm-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-confirm-delete:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+}
+
+.btn-cancel:active,
+.btn-confirm-delete:active {
+  transform: translateY(0);
+}
+
+/* Responsive modal */
+@media (max-width: 640px) {
+  .delete-confirm-modal {
+    padding: 24px;
+    max-width: 90%;
+  }
+
+  .delete-confirm-modal h3 {
+    font-size: 20px;
+  }
+
+  .delete-confirm-modal p {
+    font-size: 14px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .btn-cancel,
+  .btn-confirm-delete {
+    width: 100%;
   }
 }

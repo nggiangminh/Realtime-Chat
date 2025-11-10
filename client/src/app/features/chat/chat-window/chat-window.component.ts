@@ -26,6 +26,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
   selectedImage = signal<File | null>(null);
   imagePreviewUrl = signal<string | null>(null);
   showReactionPicker = signal<number | null>(null); // messageId hoặc null
+  showDeleteConfirm = signal<number | null>(null); // messageId cần xóa hoặc null
 
   // Danh sách emoji phổ biến
   popularEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
@@ -81,6 +82,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
     const target = event.target as HTMLElement;
     if (!target.closest('.reaction-picker') && !target.closest('.btn-add-reaction')) {
       this.showReactionPicker.set(null);
+    }
+    // Close delete confirm when clicking outside
+    if (!target.closest('.delete-confirm-modal') && !target.closest('.btn-delete-message')) {
+      this.showDeleteConfirm.set(null);
     }
   }
 
@@ -157,19 +162,33 @@ export class ChatWindowComponent implements OnInit, OnDestroy, OnChanges {
       next: (deleteData: { messageId: number, deletedBy: number }) => {
         console.log('Received message delete notification:', deleteData);
         
-        // Remove deleted message from UI
+        // Đánh dấu tin nhắn là đã xóa thay vì remove khỏi UI
         this.messages.update(msgs => 
-          msgs.filter(msg => msg.id !== deleteData.messageId)
+          msgs.map(msg => 
+            msg.id === deleteData.messageId 
+              ? { ...msg, isDeleted: true, content: 'Tin nhắn đã bị xóa' }
+              : msg
+          )
         );
       }
     });
   }
 
   deleteMessage(messageId: number): void {
-    if (confirm('Bạn có chắc chắn muốn xóa tin nhắn này? Cả bạn và người nhận đều sẽ không thấy tin nhắn này nữa.')) {
+    this.showDeleteConfirm.set(messageId);
+  }
+
+  confirmDelete(): void {
+    const messageId = this.showDeleteConfirm();
+    if (messageId) {
       console.log('Deleting message:', messageId);
       this.webSocketService.deleteMessage(messageId);
+      this.showDeleteConfirm.set(null);
     }
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm.set(null);
   }
 
   toggleReaction(messageId: number, emoji: string): void {

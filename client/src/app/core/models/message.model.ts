@@ -11,6 +11,7 @@ export interface Message {
   messageType?: 'TEXT' | 'IMAGE';
   imageUrl?: string;
   reactions?: { [emoji: string]: number }; // emoji -> count
+  isDeleted?: boolean; // Đánh dấu tin nhắn đã bị xóa
 }
 
 /**
